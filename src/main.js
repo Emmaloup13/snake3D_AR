@@ -9,6 +9,17 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
+
+let controller;
+
+window.THREE = THREE;
+
+
+const cubeSize = 0.5;
+const nbPas = 20;
+
+let gameCubeMesh;
 function loadRandomFood(x, y, z, food) {
     console.log(food);
     const loader = new GLTFLoader();
@@ -31,8 +42,10 @@ function loadRandomFood(x, y, z, food) {
         if (testModel != null) {
             console.log("Model loaded:  " + gltf.asset);
             gltf.scene.position.set(x, y, z);
+            console.log(gltf.scene.position)
             gltf.scene.name = "food";
-            scene.add(gltf.scene);
+            gltf.scene.scale.set(0.05, 0.05, 0.05);
+            gameCubeMesh.add(gltf.scene);
         } else {
             console.log("Load FAILED.");
         }
@@ -68,25 +81,47 @@ function updatePoints() {
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 20);
 
 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(width, height);
+renderer.xr.enabled = true;
 jeu.appendChild(renderer.domElement);
+
+document.body.appendChild(ARButton.createButton(renderer));
 
 const controls = new OrbitControls(camera, jeu);
 
-const cubeSize = 20;
+
+//Controller
+controller = renderer.xr.getController(0);
+controller.addEventListener('select', onSelect);
+scene.add(controller);
+
+function onSelect() {
+
+    createGameScene();
+}
 
 
+
+function onWindowResize() {
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(width, height);
+
+}
 
 
 function createCube(x, y, z) {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const geometry = new THREE.BoxGeometry(cubeSize / nbPas, cubeSize / nbPas, cubeSize / nbPas);
     const material = new THREE.MeshStandardMaterial({ color: 0x006400 });
     const cube = new THREE.Mesh(geometry, material);
     cube.position.set(x, y, z);
-    scene.add(cube);
+    gameCubeMesh.add(cube);
     return cube;
 }
 
@@ -94,7 +129,7 @@ function createCube(x, y, z) {
 //Adaptation de mon code 2D en 3D, code plus simple
 class Snake {
     lastPositions = [];
-    direction = [0, -1, 0];
+    direction = [0, -1 / (nbPas * 2), 0];
     blocks = [];
     constructor(x, y, z) {
         this.x = x;
@@ -102,7 +137,7 @@ class Snake {
         this.z = z;
         this.head = createCube(x, y, z);
         this.head.material = new THREE.MeshStandardMaterial({ color: 0x34C924 });
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 3; i++) {
             this.blocks.push(createCube(0, -i, 0));
             this.lastPositions.push([0, -i, 0]);
         }
@@ -118,15 +153,15 @@ class Snake {
     }
     move() {
         this.lastPositions.push([this.x, this.y, this.z]);
-        if (this.x < -10 || this.x > 10) {
+        if (this.x < -(cubeSize / 2) || this.x > cubeSize / 2) {
             //out of bounds
             this.x = -this.x;
         }
-        if (this.y < -10 || this.y > 10) {
+        if (this.y < -(cubeSize / 2) || this.y > cubeSize / 2) {
             //out of bounds
             this.y = -this.y;
         }
-        if (this.z < -10 || this.z > 10) {
+        if (this.z < -(cubeSize / 2) || this.z > cubeSize / 2) {
             //out of bounds
             this.z = -this.z;
         }
@@ -168,6 +203,9 @@ const FoodNames = ["hamburger", "apple", "sushi"];
 function r_int(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
+function r_(min, max) {
+    return Math.random() * (max - min) + min;
+}
 class Food {
     x = 3;
     y = 0;
@@ -182,7 +220,7 @@ class Food {
     }
 
     static getRandomFood() {
-        return new Food(r_int(-5, 5), r_int(-5, 5), r_int(-5, 5));
+        return new Food(r_(-cubeSize / 2, cubeSize / 2), r_(-cubeSize / 2, cubeSize / 2), r_(-cubeSize / 2, cubeSize / 2));
     }
 
     static getRandomFoodName() {
@@ -203,16 +241,46 @@ class Food {
 
 let food;
 
+function dumpObject(obj, lines = [], isLast = true, prefix = '') {
+    const localPrefix = isLast ? '└─' : '├─';
+    lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`);
+    const newPrefix = prefix + (isLast ? '  ' : '│ ');
+    const lastNdx = obj.children.length - 1;
+    obj.children.forEach((child, ndx) => {
+        const isLast = ndx === lastNdx;
+        dumpObject(child, lines, isLast, newPrefix);
+    });
+    return lines;
+}
+
 function init() {
     scene.clear();
 
+    //camera.position.set(0, 0, 100);
+    window.addEventListener('resize', onWindowResize);
+    //camera.lookAt(scene.position);
+    points = 0;
+
+
+}
+
+init();
+let initOk = false;
+
+function createGameScene() {
+    if (initOk) {
+        return;
+    }
     const gameCube = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-    gameCube.material = new THREE.LineBasicMaterial({ color: 0xffffff });
-    const gameCubeMesh = new THREE.Mesh(gameCube.geometry, gameCube.material);
-    gameCubeMesh.position.set(0, 0, 0);
+    const cubeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.1 });
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    gameCubeMesh = new THREE.Mesh(gameCube, cubeMat);
+    gameCubeMesh.position.set(0, 0, -1).applyMatrix4(controller.matrixWorld);
+    gameCubeMesh.quaternion.setFromRotationMatrix(controller.matrixWorld);
+    scene.add(gameCubeMesh);
 
     let edges = new THREE.EdgesGeometry(gameCube);
-    scene.add(new THREE.LineSegments(edges, gameCube.material));
+    gameCubeMesh.add(new THREE.LineSegments(edges, lineMat));
 
     const ambient = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambient);
@@ -221,42 +289,38 @@ function init() {
     frontLight.position.set(0, 10, 10);
     scene.add(frontLight);
 
-
-    // const backLight = new THREE.PointLight(0xffffff, 1, 500);
-    // backLight.position.set(4, 0, -5);
-    // scene.add(backLight);
-
-    // const sphereSize = 1;
-    // const pointLightHelper1 = new THREE.PointLightHelper(frontLight, sphereSize);
-    // scene.add(pointLightHelper1);
-    // const pointLightHelper2 = new THREE.PointLightHelper(backLight, sphereSize);
-    // scene.add(pointLightHelper2);
-    // const helper = new THREE.DirectionalLightHelper(frontLight, 5);
-    // scene.add(helper);
-
-
-    camera.position.set(0, 0, 25);
-    camera.lookAt(scene.position);
-    points = 0;
     snake = new Snake(0, 0, 0);
+
     food = Food.getRandomFood();
+
+    console.log(dumpObject(scene).join('\n'));
+
+    initOk = true;
 }
 
-init();
-
-
-function update() {
+function updateGame() {
+    if (initOk === false) {
+        return;
+    }
     snake.update();
     food.collision();
-    setTimeout(update, 250);
+    //setTimeout(update, 250);
 }
 
-update();
+const clock = new THREE.Clock();
+let nbFrames = 0;
 
 function render() {
-
-    requestAnimationFrame(render);
+    nbFrames++;
+    const elapsed = clock.getElapsedTime();
+    renderer.setAnimationLoop(render);
+    //requestAnimationFrame(render);
     controls.update();
+    if (nbFrames > 15) {
+        updateGame();
+        nbFrames = 0;
+    }
+
     updatePoints();
     renderer.render(scene, camera);
 }
@@ -287,7 +351,7 @@ window.addEventListener('keydown', function (e) {
             break;
         case '0':
             //On remet la caméra au point de départ
-            camera.position.set(0, 0, 25);
+            camera.position.set(0, 0, 100);
         case 'z':
             if (snake.direction[2] == 0) {
                 snake.direction = [0, 0, -1];
