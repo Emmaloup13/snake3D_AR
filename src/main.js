@@ -42,7 +42,6 @@ function loadRandomFood(x, y, z, food) {
         if (testModel != null) {
             console.log("Model loaded:  " + gltf.asset);
             gltf.scene.position.set(x, y, z);
-            console.log(gltf.scene.position)
             gltf.scene.name = "food";
             gltf.scene.scale.set(0.05, 0.05, 0.05);
             gameCubeMesh.add(gltf.scene);
@@ -93,18 +92,66 @@ document.body.appendChild(ARButton.createButton(renderer));
 
 const controls = new OrbitControls(camera, jeu);
 
+let coordsStart;
+let arrowHelper;
+
+
 
 //Controller
 controller = renderer.xr.getController(0);
 controller.addEventListener('select', onSelect);
+controller.addEventListener('selectstart', (e) => {
+    coordsStart = e.data.gamepad.axes;
+    console.log("Start : " + coordsStart);
+    remove3DobjectByName("arrow");
+    let origin = new THREE.Vector3(0, 0, -2);
+    let length = 0.2;
+    let hex = 0xffff00;
+    //Bouton "droite"
+    if (coordsStart[0] >= 0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
+        console.log('Droite');
+        let dir = new THREE.Vector3(1, 0, 0);
+        dir.normalize();
+        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+        arrowHelper.name = "arrow";
+        scene.add(arrowHelper);
+    }
+    //Bouton gauche
+    else if (coordsStart[0] <= -0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
+        console.log('Gauche');
+        let dir = new THREE.Vector3(-1, 0, 0);
+        dir.normalize();
+        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+        arrowHelper.name = "arrow";
+        scene.add(arrowHelper);
+    }
+    //Bouton haut
+    else if (coordsStart[1] <= -0.5) {
+        console.log('Haut');
+        let dir = new THREE.Vector3(0, 1, 0);
+        dir.normalize();
+        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+        arrowHelper.name = "arrow";
+        scene.add(arrowHelper);
+    }
+    //Bouton bas
+    else if (coordsStart[1] >= 0.5) {
+        console.log('Bas');
+        let dir = new THREE.Vector3(0, -1, 0);
+        dir.normalize();
+        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+        arrowHelper.name = "arrow";
+        scene.add(arrowHelper);
+    }
+})
+
 scene.add(controller);
 
 function onSelect() {
 
     createGameScene();
+    controller.removeEventListener('select');
 }
-
-
 
 function onWindowResize() {
 
@@ -275,7 +322,7 @@ function createGameScene() {
     const cubeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.1 });
     const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
     gameCubeMesh = new THREE.Mesh(gameCube, cubeMat);
-    gameCubeMesh.position.set(0, 0, -1).applyMatrix4(controller.matrixWorld);
+    gameCubeMesh.position.set(0, 0, -2).applyMatrix4(controller.matrixWorld);
     gameCubeMesh.quaternion.setFromRotationMatrix(controller.matrixWorld);
     scene.add(gameCubeMesh);
 
