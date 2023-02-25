@@ -43,7 +43,7 @@ function loadRandomFood(x, y, z, food) {
             console.log("Model loaded:  " + gltf.asset);
             gltf.scene.position.set(x, y, z);
             gltf.scene.name = "food";
-            gltf.scene.scale.set(0.05, 0.05, 0.05);
+            gltf.scene.scale.set(0.04, 0.04, 0.04);
             gameCubeMesh.add(gltf.scene);
         } else {
             console.log("Load FAILED.");
@@ -52,9 +52,10 @@ function loadRandomFood(x, y, z, food) {
 }
 
 function remove3DobjectByName(objName) {
-    var selectedObject = scene.getObjectByName(objName);
-    scene.remove(selectedObject);
+    // var selectedObject = scene.getObjectByName(objName);
+    // scene.remove(selectedObject);
     //animate();
+    gameCubeMesh.removeChild(objName);
 }
 
 
@@ -93,22 +94,44 @@ document.body.appendChild(ARButton.createButton(renderer));
 const controls = new OrbitControls(camera, jeu);
 
 let coordsStart;
-let arrowHelper;
 let snake;
 let currentDirection;
-
+let camPos;
 //Controller
 controller = renderer.xr.getController(0);
 controller.addEventListener('select', onSelect);
 controller.addEventListener('selectstart', (e) => {
     coordsStart = e.data.gamepad.axes;
+    camPos = renderer.xr.getCamera().position;
     //Bouton "droite"
     if (coordsStart[0] >= 0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
-        currentDirection = "Droite";
+        if (camPos.x > 0 && camPos.x > camPos.y && camPos.x > camPos.z) {
+            currentDirection = "Derrière";
+        }/*
+        else if (camPos.x < 0 && camPos.x < camPos.y && camPos.x < camPos.z) {
+            currentDirection = "Devant";
+        }
+        else if (camPos.z < 0 && camPos.z < camPos.x && camPos.z < camPos.y) {
+            currentDirection = "Gauche";
+        }*/
+        else {
+            currentDirection = "Droite";
+        }
     }
     //Bouton gauche
     else if (coordsStart[0] <= -0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
-        currentDirection = "Gauche";
+        if (camPos.x > 0 && camPos.x > camPos.y && camPos.x > camPos.z) {
+            currentDirection = "Devant";
+        }/*
+        else if (camPos.x < 0 && camPos.x < camPos.y && camPos.x < camPos.z) {
+            currentDirection = "Derrière";
+        }
+        else if (camPos.z < 0 && camPos.z < camPos.x && camPos.z < camPos.y) {
+            currentDirection = "Droite";
+        }*/
+        else {
+            currentDirection = "Gauche";
+        }
     }
     //Bouton haut
     else if (coordsStart[1] <= -0.5) {
@@ -117,6 +140,7 @@ controller.addEventListener('selectstart', (e) => {
     //Bouton bas
     else if (coordsStart[1] >= 0.5) {
         currentDirection = "Bas";
+
     }
 })
 controller.addEventListener('selectend', () => {
@@ -142,14 +166,14 @@ controller.addEventListener('selectend', () => {
                 snake.direction = [0, -0.025, 0];
             }
             break;
-        case 'z':
+        case 'Derrière':
             if (snake.direction[2] == 0) {
-                snake.direction = [0, 0, -1];
+                snake.direction = [0, 0, -0.025];
             }
             break;
-        case 's':
+        case 'Devant':
             if (snake.direction[2] == 0) {
-                snake.direction = [0, 0, 1];
+                snake.direction = [0, 0, 0.025];
             }
             break;
         default:
@@ -329,7 +353,7 @@ function createGameScene() {
         return;
     }
     const gameCube = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-    const cubeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.1 });
+    const cubeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.3 });
     const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
     gameCubeMesh = new THREE.Mesh(gameCube, cubeMat);
     gameCubeMesh.position.set(0, 0, -2).applyMatrix4(controller.matrixWorld);
