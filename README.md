@@ -4,7 +4,7 @@
 
 * Placer le cube de jeu dans l'espace en cliquant sur votre écran
 * Pour déplacer le serpent, rien de plus simple :
- ** appuyez dans la zone droite de votre écran pour qu'il aille à droite
+ - appuyez dans la zone droite de votre écran pour qu'il aille à droite
  - appuyez dans la zone gauche de votre écran pour qu'il aille à gauche
  - appuyez dans la zone basse de votre écran pour qu'il aille en bas
  - appuyez dans la zone haute de votre écran pour qu'il aille en haut
@@ -21,3 +21,8 @@
 ## Pour le lancer
 
 Vous pouvez utiliser ngrok puis un qr code pour lancer le jeu
+
+## Démo
+
+https://user-images.githubusercontent.com/116184717/221367671-85b8bdcc-fe0c-4e94-9df2-4c3633fdba88.mp4
+
