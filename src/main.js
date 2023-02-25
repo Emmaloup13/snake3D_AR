@@ -102,50 +102,21 @@ controller = renderer.xr.getController(0);
 controller.addEventListener('select', onSelect);
 controller.addEventListener('selectstart', (e) => {
     coordsStart = e.data.gamepad.axes;
-    console.log("Start : " + coordsStart);
-    remove3DobjectByName("arrow");
-    let origin = new THREE.Vector3(0, 0, -2);
-    let length = 0.2;
-    let hex = 0xffff00;
     //Bouton "droite"
     if (coordsStart[0] >= 0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
-        console.log('Droite');
         currentDirection = "Droite";
-        let dir = new THREE.Vector3(1, 0, 0);
-        dir.normalize();
-        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
-        arrowHelper.name = "arrow";
-        scene.add(arrowHelper);
     }
     //Bouton gauche
     else if (coordsStart[0] <= -0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
-        console.log('Gauche');
         currentDirection = "Gauche";
-        let dir = new THREE.Vector3(-1, 0, 0);
-        dir.normalize();
-        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
-        arrowHelper.name = "arrow";
-        scene.add(arrowHelper);
     }
     //Bouton haut
     else if (coordsStart[1] <= -0.5) {
-        console.log('Haut');
         currentDirection = "Haut";
-        let dir = new THREE.Vector3(0, 1, 0);
-        dir.normalize();
-        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
-        arrowHelper.name = "arrow";
-        scene.add(arrowHelper);
     }
     //Bouton bas
     else if (coordsStart[1] >= 0.5) {
-        console.log('Bas');
         currentDirection = "Bas";
-        let dir = new THREE.Vector3(0, -1, 0);
-        dir.normalize();
-        arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
-        arrowHelper.name = "arrow";
-        scene.add(arrowHelper);
     }
 })
 controller.addEventListener('selectend', () => {
@@ -186,8 +157,6 @@ controller.addEventListener('selectend', () => {
     }
 })
 scene.add(controller);
-
-
 function onSelect() {
 
     createGameScene();
