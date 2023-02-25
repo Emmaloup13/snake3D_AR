@@ -94,8 +94,8 @@ const controls = new OrbitControls(camera, jeu);
 
 let coordsStart;
 let arrowHelper;
-
-
+let snake;
+let currentDirection;
 
 //Controller
 controller = renderer.xr.getController(0);
@@ -110,6 +110,7 @@ controller.addEventListener('selectstart', (e) => {
     //Bouton "droite"
     if (coordsStart[0] >= 0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
         console.log('Droite');
+        currentDirection = "Droite";
         let dir = new THREE.Vector3(1, 0, 0);
         dir.normalize();
         arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
@@ -119,6 +120,7 @@ controller.addEventListener('selectstart', (e) => {
     //Bouton gauche
     else if (coordsStart[0] <= -0.5 && -0.5 < coordsStart[1] && coordsStart[1] < 0.5) {
         console.log('Gauche');
+        currentDirection = "Gauche";
         let dir = new THREE.Vector3(-1, 0, 0);
         dir.normalize();
         arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
@@ -128,6 +130,7 @@ controller.addEventListener('selectstart', (e) => {
     //Bouton haut
     else if (coordsStart[1] <= -0.5) {
         console.log('Haut');
+        currentDirection = "Haut";
         let dir = new THREE.Vector3(0, 1, 0);
         dir.normalize();
         arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
@@ -137,6 +140,7 @@ controller.addEventListener('selectstart', (e) => {
     //Bouton bas
     else if (coordsStart[1] >= 0.5) {
         console.log('Bas');
+        currentDirection = "Bas";
         let dir = new THREE.Vector3(0, -1, 0);
         dir.normalize();
         arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
@@ -144,13 +148,50 @@ controller.addEventListener('selectstart', (e) => {
         scene.add(arrowHelper);
     }
 })
-
+controller.addEventListener('selectend', () => {
+    dumpObject(scene);
+    switch (currentDirection) {
+        case 'Gauche':
+            if (snake.direction[0] == 0) {
+                snake.direction = [-0.025, 0, 0];
+            }
+            break;
+        case 'Droite':
+            if (snake.direction[0] == 0) {
+                snake.direction = [0.025, 0, 0];
+            }
+            break;
+        case 'Haut':
+            if (snake.direction[1] == 0) {
+                snake.direction = [0, 0.025, 0];
+            }
+            break;
+        case 'Bas':
+            if (snake.direction[1] == 0) {
+                snake.direction = [0, -0.025, 0];
+            }
+            break;
+        case 'z':
+            if (snake.direction[2] == 0) {
+                snake.direction = [0, 0, -1];
+            }
+            break;
+        case 's':
+            if (snake.direction[2] == 0) {
+                snake.direction = [0, 0, 1];
+            }
+            break;
+        default:
+            break;
+    }
+})
 scene.add(controller);
+
 
 function onSelect() {
 
     createGameScene();
-    controller.removeEventListener('select');
+    //controller.removeEventListener('select');
 }
 
 function onWindowResize() {
@@ -244,7 +285,7 @@ class Snake {
     }
 }
 
-let snake;
+
 const FoodNames = ["hamburger", "apple", "sushi"];
 
 function r_int(min, max) {
@@ -354,12 +395,10 @@ function updateGame() {
     //setTimeout(update, 250);
 }
 
-const clock = new THREE.Clock();
 let nbFrames = 0;
 
 function render() {
     nbFrames++;
-    const elapsed = clock.getElapsedTime();
     renderer.setAnimationLoop(render);
     //requestAnimationFrame(render);
     controls.update();
@@ -373,43 +412,8 @@ function render() {
 }
 render();
 
-window.addEventListener('keydown', function (e) {
-    console.log(e.key);
-    switch (e.key) {
-        case 'ArrowLeft':
-            if (snake.direction[0] == 0) {
-                snake.direction = [-1, 0, 0];
-            }
-            break;
-        case 'ArrowRight':
-            if (snake.direction[0] == 0) {
-                snake.direction = [1, 0, 0];
-            }
-            break;
-        case 'ArrowUp':
-            if (snake.direction[1] == 0) {
-                snake.direction = [0, 1, 0];
-            }
-            break;
-        case 'ArrowDown':
-            if (snake.direction[1] == 0) {
-                snake.direction = [0, -1, 0];
-            }
-            break;
-        case '0':
-            //On remet la caméra au point de départ
-            camera.position.set(0, 0, 100);
-        case 'z':
-            if (snake.direction[2] == 0) {
-                snake.direction = [0, 0, -1];
-            }
-            break;
-        case 's':
-            if (snake.direction[2] == 0) {
-                snake.direction = [0, 0, 1];
-            }
-            break;
-        default:
-            break;
-    }
-});
+//window.addEventListener('keydown', function (e) {
+//  console.log(e.key);
+
+
+//});
