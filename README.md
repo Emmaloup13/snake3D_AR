@@ -4,10 +4,10 @@
 
 * Placer le cube de jeu dans l'espace en cliquant sur votre écran
 * Pour déplacer le serpent, rien de plus simple :
- -- appuyez dans la zone droite de votre écran pour qu'il aille à droite
- -- appuyez dans la zone gauche de votre écran pour qu'il aille à gauche
- -- appuyez dans la zone basse de votre écran pour qu'il aille en bas
- -- appuyez dans la zone haute de votre écran pour qu'il aille en haut
+ ** appuyez dans la zone droite de votre écran pour qu'il aille à droite
+ - appuyez dans la zone gauche de votre écran pour qu'il aille à gauche
+ - appuyez dans la zone basse de votre écran pour qu'il aille en bas
+ - appuyez dans la zone haute de votre écran pour qu'il aille en haut
  
 * Déplacez vous autour du cube pour le voir sous tous ses angles !
  
