@@ -20,7 +20,10 @@
  
 ## Pour le lancer
 
-Vous pouvez utiliser ngrok puis un qr code pour lancer le jeu
+Deux solutions : 
+* La plus rapide : créer un qr code à partir de cet url : https://emmaloup13.github.io/snake3D_AR/
+
+* Les pages GitHub étant parfois un peu capricieuses, vous pouvez utiliser ngrok pour créer une page web en ligne et créer un qr code à partir de cette nouvelle adresse.
 
 ## Démo
 
