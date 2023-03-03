@@ -1,5 +1,7 @@
 # Snake 3D Augmented Reality
 
+Ayant repris les cours le lundi 27 février, je n'ai pas eu de disponibilités pour continuer ce projet. J'ai cependant eu le temps de manipuler beaucoup d'aspects de WEBGL et de l'AR au cours de ces deux projets !
+
 ## Principe
 
 * Placer le cube de jeu dans l'espace en cliquant sur votre écran
@@ -21,6 +23,7 @@
 ## Pour le lancer
 
 Deux solutions : 
+
 * La plus rapide : créer un qr code à partir de cet url : https://emmaloup13.github.io/snake3D_AR/
 
 * Les pages GitHub étant parfois un peu capricieuses, vous pouvez utiliser ngrok pour créer une page web en ligne et créer un qr code à partir de cette nouvelle adresse.
